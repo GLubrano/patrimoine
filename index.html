@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F151C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Patrimoine">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Patrimoine</title>
+<style>
+:root{
+  --bg:#0F151C;
+  --surface:#18202B;
+  --surface-2:#1F2935;
+  --line:#2A3542;
+  --ink:#E8EDF2;
+  --ink-dim:#8B99A8;
+  --ink-faint:#5C6876;
+  --brass:#C9A961;
+  --brass-dim:#8E7742;
+  --up:#5CB08B;
+  --down:#D2705F;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;
+  padding-bottom:calc(72px + var(--safe-b));
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--brass)}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}.dim{color:var(--ink-dim)}
+
+/* ---- header ---- */
+header{padding:calc(env(safe-area-inset-top,0px) + 18px) 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.brand{font-family:var(--serif);font-size:17px;letter-spacing:.01em;color:var(--brass)}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:17px;position:relative}
+.icon-btn.alert::after{content:"";position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 2px var(--bg)}
+
+/* ---- hero ---- */
+.hero{padding:22px 20px 6px}
+.hero .label{color:var(--ink-faint);font-size:13px}
+.hero .total{font-family:var(--serif);font-size:44px;line-height:1.05;margin:6px 0 8px;letter-spacing:-.02em}
+.hero .delta{font-size:14px}
+.chart{width:100%;height:150px;display:block;margin-top:10px}
+.chart-empty{height:150px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:13px;text-align:center;padding:0 30px}
+
+/* ---- banner ---- */
+.banner{margin:14px 20px 0;padding:12px 14px;border-radius:12px;background:var(--surface);border-left:3px solid var(--brass);display:flex;gap:12px;align-items:center;justify-content:space-between}
+.banner p{margin:0;font-size:13.5px;color:var(--ink-dim)}
+.banner button{background:var(--brass);color:#14181E;font-weight:600;font-size:13px;padding:8px 13px;border-radius:9px;white-space:nowrap}
+
+/* ---- sections ---- */
+main{padding:0 20px}
+.sec{margin-top:28px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.sec-head h2{font-family:var(--serif);font-weight:400;font-size:19px;margin:0}
+.sec-head .sum{font-size:14px;color:var(--ink-dim)}
+.add{color:var(--brass);font-size:14px;padding:4px 0}
+
+.row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .main{flex:1;min-width:0}
+.row .name{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub{font-size:12.5px;color:var(--ink-faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .right{text-align:right;flex-shrink:0}
+.row .val{font-size:15px}
+.row .perf{font-size:12.5px;margin-top:2px}
+.empty{color:var(--ink-faint);font-size:13.5px;padding:14px 0}
+
+.card{background:var(--surface);border-radius:14px;padding:16px;margin-top:12px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpi .k{font-size:12.5px;color:var(--ink-faint)}
+.kpi .v{font-size:19px;margin-top:3px;font-family:var(--serif)}
+
+/* ---- tabs ---- */
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(15,21,28,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b);z-index:40}
+nav button{flex:1;padding:10px 0 11px;font-size:10.5px;color:var(--ink-faint);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button .gl{font-size:19px;line-height:1}
+nav button[aria-selected="true"]{color:var(--brass)}
+
+/* ---- modal ---- */
+.sheet{position:fixed;inset:0;background:rgba(6,9,13,.6);display:none;align-items:flex-end;z-index:60}
+.sheet.open{display:flex}
+.sheet-in{background:var(--surface);width:100%;max-height:92vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:20px 20px calc(24px + var(--safe-b))}
+.sheet h3{font-family:var(--serif);font-weight:400;font-size:20px;margin:0 0 16px}
+label{display:block;font-size:12.5px;color:var(--ink-faint);margin:14px 0 5px}
+input,select,textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--brass-dim)}
+textarea{resize:vertical;min-height:88px;font-size:15px;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.actions{display:flex;gap:10px;margin-top:22px}
+.btn{flex:1;padding:13px;border-radius:11px;text-align:center;font-size:15px;font-weight:600}
+.btn-p{background:var(--brass);color:#14181E}
+.btn-s{background:var(--surface-2);color:var(--ink)}
+.btn-d{background:transparent;color:var(--down);flex:0 0 auto;padding:13px 16px}
+.hint{font-size:12px;color:var(--ink-faint);margin-top:8px;line-height:1.45}
+
+/* ---- claude ---- */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:8px 13px;font-size:13px;color:var(--ink-dim)}
+.answer{margin-top:18px;background:var(--surface);border-radius:14px;padding:16px;font-size:14.5px;line-height:1.62}
+.answer h4{font-family:var(--serif);font-weight:400;font-size:16px;margin:16px 0 6px}
+.answer h4:first-child{margin-top:0}
+.answer ul{margin:8px 0;padding-left:18px}
+.answer li{margin:4px 0}
+.answer p{margin:8px 0}
+.answer strong{color:var(--brass)}
+.disclaimer{font-size:11.5px;color:var(--ink-faint);margin-top:14px;line-height:1.45}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--brass-dim);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--safe-b));background:var(--surface-2);border:1px solid var(--line);padding:10px 16px;border-radius:20px;font-size:13.5px;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Patrimoine</div>
+  <button class="icon-btn" id="btn-settings" aria-label="Réglages">⚙</button>
+</header>
+
+<div id="view"></div>
+
+<nav>
+  <button data-tab="home" aria-selected="true"><span class="gl">◆</span>Patrimoine</button>
+  <button data-tab="pea" aria-selected="false"><span class="gl">▲</span>PEA</button>
+  <button data-tab="div" aria-selected="false"><span class="gl">●</span>Dividendes</button>
+  <button data-tab="stats" aria-selected="false"><span class="gl">▮</span>Stats</button>
+  <button data-tab="ai" aria-selected="false"><span class="gl">✦</span>Analyse</button>
+</nav>
+
+<div class="sheet" id="sheet"><div class="sheet-in" id="sheet-in"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================ ÉTAT ============================ */
+const KEY='patrimoine.v1';
+const CATS={invest:'Comptes d\u2019investissement',epargne:'Épargne',courant:'Comptes courants',crypto:'Crypto'};
+const DEFAULT={
+  v:1,
+  settings:{workerUrl:'',token:''},
+  accounts:[],
+  pea:{openDate:'2022-06-28',cash:0,contributions:[],positions:[],sales:[],dividends:[]},
+  snapshots:[]
+};
+let S=load();
+let tab='home';
+
+function load(){
+  try{const r=localStorage.getItem(KEY);if(!r)return structuredClone(DEFAULT);
+    const d=JSON.parse(r);return Object.assign(structuredClone(DEFAULT),d);
+  }catch(e){return structuredClone(DEFAULT)}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+const uid=()=>Math.random().toString(36).slice(2,10);
+
+/* ============================ FORMAT ============================ */
+const eur=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+const eur2=n=>(n==null||isNaN(n))?'—':new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(n);
+const pct=n=>(n==null||isNaN(n)||!isFinite(n))?'—':(n>=0?'+':'')+n.toFixed(1).replace('.',',')+' %';
+const cls=n=>(n==null||isNaN(n))?'dim':(n>=0?'up':'down');
+const dfr=d=>d?new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'2-digit'}):'—';
+const today=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ============================ CALCULS ============================ */
+function peaValue(){
+  return S.pea.positions.reduce((a,p)=>a+(p.qty*(p.price||p.pru)),0)+(+S.pea.cash||0);
+}
+function peaInvested(){return S.pea.contributions.reduce((a,c)=>a+ +c.amount,0)}
+function accountValue(a){
+  if(a.category==='crypto'&&a.qty&&a.price)return a.qty*a.price;
+  return +a.value||0;
+}
+function catTotal(cat){
+  let t=S.accounts.filter(a=>a.category===cat).reduce((s,a)=>s+accountValue(a),0);
+  if(cat==='invest')t+=peaValue();
+  return t;
+}
+function total(){return Object.keys(CATS).reduce((s,c)=>s+catTotal(c),0)}
+
+/* TRI (money-weighted) par Newton-Raphson */
+function xirr(flows){
+  if(flows.length<2)return null;
+  const t0=new Date(flows[0].date).getTime();
+  const yrs=f=>(new Date(f.date).getTime()-t0)/(365.25*864e5);
+  const npv=r=>flows.reduce((s,f)=>s+f.amount/Math.pow(1+r,yrs(f)),0);
+  let r=0.08;
+  for(let i=0;i<80;i++){
+    const f0=npv(r),d=(npv(r+1e-5)-f0)/1e-5;
+    if(Math.abs(d)<1e-10)break;
+    const nr=r-f0/d;
+    if(!isFinite(nr))break;
+    if(Math.abs(nr-r)<1e-8){r=nr;break}
+    r=Math.max(-0.95,Math.min(10,nr));
+  }
+  return (isFinite(r)&&Math.abs(npv(r))<Math.max(50,Math.abs(flows[0].amount)*0.02))?r*100:null;
+}
+function peaTri(){
+  const f=S.pea.contributions.filter(c=>c.date).map(c=>({date:c.date,amount:-Math.abs(+c.amount)}))
+    .sort((a,b)=>a.date<b.date?-1:1);
+  if(!f.length)return null;
+  f.push({date:today(),amount:peaValue()});
+  return xirr(f);
+}
+
+/* Relevé attendu le 5 et le 20 */
+function dueSnapshot(){
+  const d=new Date(),day=d.getDate();
+  const y=d.getFullYear(),m=d.getMonth();
+  let since=null;
+  if(day>=20)since=new Date(y,m,20);
+  else if(day>=5)since=new Date(y,m,5);
+  if(!since)return false;
+  const iso=since.toISOString().slice(0,10);
+  return !S.snapshots.some(s=>s.date>=iso);
+}
+function takeSnapshot(){
+  const snap={date:today(),total:total()};
+  Object.keys(CATS).forEach(c=>snap[c]=catTotal(c));
+  S.snapshots=S.snapshots.filter(s=>s.date!==snap.date);
+  S.snapshots.push(snap);
+  S.snapshots.sort((a,b)=>a.date<b.date?-1:1);
+  save();render();toast('Relevé enregistré');
+}
+
+/* ============================ VUES ============================ */
+const el=()=>document.getElementById('view');
+
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+  document.getElementById('btn-settings').classList.toggle('alert',dueSnapshot());
+  ({home:viewHome,pea:viewPea,div:viewDiv,stats:viewStats,ai:viewAi})[tab]();
+  window.scrollTo(0,0);
+}
+
+/* ---------- Patrimoine ---------- */
+function viewHome(){
+  const t=total(),snaps=S.snapshots;
+  const prev=snaps.length?snaps[snaps.length-1]:null;
+  const delta=prev?t-prev.total:null;
+  const dpct=prev&&prev.total?delta/prev.total*100:null;
+
+  let h=`<div class="hero">
+    <div class="label">Total au ${dfr(today())}</div>
+    <div class="total">${eur(t)}</div>
+    ${prev?`<div class="delta ${cls(delta)}">${delta>=0?'+':''}${eur(delta)} · ${pct(dpct)} depuis le relevé du ${dfr(prev.date)}</div>`
+          :`<div class="delta dim">Premier relevé à enregistrer</div>`}
+    ${chart(snaps,t)}
+  </div>`;
+
+  if(dueSnapshot())h+=`<div class="banner"><p>Un relevé est attendu. Mets à jour tes valeurs, puis fige la photo du jour.</p><button onclick="takeSnapshot()">Enregistrer</button></div>`;
+
+  h+='<main>';
+  for(const [k,titre] of Object.entries(CATS)){
+    const list=S.accounts.filter(a=>a.category===k);
+    h+=`<section class="sec"><div class="sec-head"><h2>${titre}</h2><span class="sum num">${eur(catTotal(k))}</span></div>`;
+    if(k==='invest'){
+      const pv=peaValue(),inv=peaInvested();
+      h+=`<div class="row" onclick="tab='pea';render()">
+        <div class="main"><div class="name">PEA</div><div class="sub">BoursoBank · ouvert le ${dfr(S.pea.openDate)}</div></div>
+        <div class="right"><div class="val num">${eur(pv)}</div><div class="perf num ${cls(pv-inv)}">${inv?pct((pv-inv)/inv*100):'—'}</div></div></div>`;
+    }
+    h+=list.map(a=>{
+      const v=accountValue(a),p=a.invested?((v-a.invested)/a.invested*100):null;
+      return `<div class="row" onclick="editAccount('${a.id}')">
+        <div class="main"><div class="name">${esc(a.name)}</div><div class="sub">${esc(a.institution||'')}${a.qty?' · '+a.qty+' unités':''}</div></div>
+        <div class="right"><div class="val num">${eur(v)}</div><div class="perf num ${cls(p)}">${p==null?'':pct(p)}</div></div></div>`;
+    }).join('');
+    if(!list.length&&k!=='invest')h+=`<div class="empty">Rien ici pour l\u2019instant.</div>`;
+    h+=`<button class="add" onclick="editAccount(null,'${k}')">+ Ajouter une ligne</button></section>`;
+  }
+  h+=`<section class="sec"><button class="btn btn-s" style="width:100%" onclick="takeSnapshot()">Enregistrer le relevé du jour</button>
+      <div class="hint">Les relevés alimentent la courbe. Deux par mois suffisent (le 5 et le 20).</div></section></main>`;
+  el().innerHTML=h;
+}
+
+function chart(snaps,live){
+  const pts=snaps.map(s=>({d:s.date,v:s.total}));
+  if(snaps.length&&snaps[snaps.length-1].date!==today())pts.push({d:today(),v:live});
+  if(pts.length<2)return `<div class="chart-empty">La courbe apparaîtra après ton deuxième relevé.</div>`;
+  const W=340,H=150,P=6;
+  const vs=pts.map(p=>p.v),min=Math.min(...vs),max=Math.max(...vs),span=(max-min)||1;
+  const x=i=>P+i*(W-2*P)/(pts.length-1);
+  const y=v=>H-14-((v-min)/span)*(H-34);
+  const line=pts.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  const area=`${line} L${x(pts.length-1).toFixed(1)},${H-14} L${x(0).toFixed(1)},${H-14} Z`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Évolution du patrimoine">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C9A961" stop-opacity=".26"/><stop offset="100%" stop-color="#C9A961" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#g)"/>
+    <path d="${line}" fill="none" stroke="#C9A961" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="${x(pts.length-1).toFixed(1)}" cy="${y(pts[pts.length-1].v).toFixed(1)}" r="3" fill="#C9A961"/>
+  </svg>`;
+}
+
+/* ---------- PEA ---------- */
+function viewPea(){
+  const pv=peaValue(),inv=peaInvested(),tri=peaTri();
+  const divY=S.pea.dividends.filter(d=>d.date>=today().slice(0,4)+'-01-01').reduce((a,d)=>a+ +d.amount,0);
+  let h=`<div class="hero">
+    <div class="label">PEA ouvert le ${dfr(S.pea.openDate)}</div>
+    <div class="total">${eur(pv)}</div>
+    <div class="delta ${cls(pv-inv)}">${pv-inv>=0?'+':''}${eur(pv-inv)} sur ${eur(inv)} versés</div>
+  </div><main>
+  <div class="card kpis">
+    <div class="kpi"><div class="k">Performance brute</div><div class="v num ${cls(pv-inv)}">${inv?pct((pv-inv)/inv*100):'—'}</div></div>
+    <div class="kpi"><div class="k">TRI annualisé</div><div class="v num ${cls(tri)}">${tri==null?'—':pct(tri)}</div></div>
+    <div class="kpi"><div class="k">Liquidités</div><div class="v num">${eur(S.pea.cash)}</div></div>
+    <div class="kpi"><div class="k">Dividendes ${today().slice(0,4)}</div><div class="v num">${eur(divY)}</div></div>
+  </div>
+  <div class="hint">Le TRI pondère chaque versement par sa date. C\u2019est la mesure honnête de ta performance, la perf brute ne l\u2019est pas.</div>`;
+
+  h+=`<section class="sec"><div class="sec-head"><h2>Lignes</h2>
+      <button class="add" onclick="refreshPrices()">Actualiser les cours</button></div>`;
+  const ps=[...S.pea.positions].sort((a,b)=>b.qty*(b.price||b.pru)-a.qty*(a.price||a.pru));
+  h+=ps.map(p=>{
+    const val=p.qty*(p.price||p.pru),perf=((p.price||p.pru)-p.pru)/p.pru*100;
+    const w=pv?val/pv*100:0;
+    return `<div class="row" onclick="editPosition('${p.id}')">
+      <div class="main"><div class="name">${esc(p.name||p.ticker)}</div>
+      <div class="sub">${esc(p.ticker)} · ${p.qty} × ${eur2(p.price||p.pru)} · ${w.toFixed(0)} %${p.priceAt?' · maj '+dfr(p.priceAt):''}</div></div>
+      <div class="right"><div class="val num">${eur(val)}</div><div class="perf num ${cls(perf)}">${pct(perf)}</div></div></div>`;
+  }).join('')||`<div class="empty">Aucune ligne saisie.</div>`;
+  h+=`<button class="add" onclick="editPosition(null)">+ Ajouter une ligne</button></section>`;
+
+  h+=`<section class="sec"><div class="sec-head"><h2>Versements</h2><span class="sum num">${eur(inv)}</span></div>`;
+  h+=[...S.pea.contributions].sort((a,b)=>b.date<a.date?-1:1).map(c=>
+    `<div class="row" onclick="editContribution('${c.id}')"><div class="main"><div class="name">${dfr(c.date)}</div></div>
+     <div class="right"><div class="val num">${eur(c.amount)}</div></div></div>`).join('')||`<div class="empty">Ajoute au moins ton versement initial, sinon le TRI est incalculable.</div>`;
+  h+=`<button class="add" onclick="editContribution(null)">+ Ajouter un versement</button></section>`;
+
+  h+=`<section class="sec"><button class="btn btn-s" style="width:100%" onclick="editSale(null)">Enregistrer une vente</button></section></main>`;
+  el().innerHTML=h;
+}
+
+/* ---------- Dividendes ---------- */
+function viewDiv(){
+  const ds=[...S.pea.dividends].sort((a,b)=>b.date<a.date?-1:1);
+  const byYear={};ds.forEach(d=>{const y=d.date.slice(0,4);byYear[y]=(byYear[y]||0)+ +d.amount});
+  const y=today().slice(0,4),cur=byYear[y]||0,pv=peaValue();
+  let h=`<div class="hero"><div class="label">Dividendes encaissés en ${y}</div>
+    <div class="total">${eur(cur)}</div>
+    <div class="delta dim">${pv?(cur/pv*100).toFixed(2).replace('.',',')+' % du PEA':''}</div></div><main>`;
+  h+=`<section class="sec"><div class="sec-head"><h2>Par année</h2></div>`;
+  h+=Object.keys(byYear).sort().reverse().map(k=>
+    `<div class="row"><div class="main"><div class="name">${k}</div></div><div class="right"><div class="val num">${eur(byYear[k])}</div></div></div>`
+  ).join('')||`<div class="empty">Aucun dividende enregistré.</div>`;
+  h+=`</section><section class="sec"><div class="sec-head"><h2>Détachements</h2></div>`;
+  h+=ds.map(d=>`<div class="row" onclick="editDividend('${d.id}')">
+    <div class="main"><div class="name">${esc(d.name||d.ticker)}</div><div class="sub">détaché le ${dfr(d.date)}</div></div>
+    <div class="right"><div class="val num">${eur2(d.amount)}</div></div></div>`).join('')||`<div class="empty">Rien pour l\u2019instant.</div>`;
+  h+=`<button class="add" onclick="editDividend(null)">+ Ajouter un dividende</button></section></main>`;
+  el().innerHTML=h;
+}
+
+/* ---------- Stats ---------- */
+function viewStats(){
+  const sales=S.pea.sales.map(s=>({...s,gain:(s.price-s.pru)*s.qty,p:(s.price-s.pru)/s.pru*100}))
+    .sort((a,b)=>b.p-a.p);
+  const realized=sales.reduce((a,s)=>a+s.gain,0);
+  const win=sales.filter(s=>s.gain>0).length;
+  let h=`<div class="hero"><div class="label">Plus-values réalisées</div>
+    <div class="total ${cls(realized)}">${eur(realized)}</div>
+    <div class="delta dim">${sales.length} vente${sales.length>1?'s':''} · ${sales.length?Math.round(win/sales.length*100):0} % gagnantes</div></div><main>`;
+  const block=(titre,arr)=>{
+    let x=`<section class="sec"><div class="sec-head"><h2>${titre}</h2></div>`;
+    x+=arr.map(s=>`<div class="row" onclick="editSale('${s.id}')">
+      <div class="main"><div class="name">${esc(s.name||s.ticker)}</div><div class="sub">${s.qty} × ${eur2(s.price)} · vendu le ${dfr(s.date)}</div></div>
+      <div class="right"><div class="val num ${cls(s.gain)}">${s.gain>=0?'+':''}${eur(s.gain)}</div><div class="perf num ${cls(s.p)}">${pct(s.p)}</div></div></div>`).join('');
+    return x+'</section>';
+  };
+  if(!sales.length){
+    h+=`<div class="empty" style="padding-top:26px">Aucune vente enregistrée. L\u2019historique démarre aujourd\u2019hui : chaque vente saisie viendra nourrir ce classement.</div>`;
+  }else{
+    h+=block('Meilleures ventes',sales.slice(0,5));
+    if(sales.length>5)h+=block('Pires ventes',sales.slice(-5).reverse());
+  }
+  h+=`<section class="sec"><div class="sec-head"><h2>Répartition</h2></div>`;
+  const t=total();
+  h+=Object.entries(CATS).map(([k,v])=>{
+    const c=catTotal(k),w=t?c/t*100:0;
+    return `<div class="row"><div class="main"><div class="name">${v}</div>
+      <div style="height:4px;background:var(--surface-2);border-radius:2px;margin-top:7px"><div style="height:4px;width:${w.toFixed(1)}%;background:var(--brass);border-radius:2px"></div></div></div>
+      <div class="right"><div class="val num">${w.toFixed(0)} %</div><div class="perf dim num">${eur(c)}</div></div></div>`;
+  }).join('');
+  h+='</section></main>';
+  el().innerHTML=h;
+}
+
+/* ---------- Analyse (Claude) ---------- */
+const PRESETS=[
+  'Analyse la structure de mon patrimoine',
+  'Mon PEA est-il trop concentré ?',
+  'Que penses-tu de ma poche crypto ?',
+  'Quels risques je ne vois pas ?',
+  'Mon épargne de précaution est-elle suffisante ?'
+];
+let lastAnswer='';
+function viewAi(){
+  const ok=!!S.settings.workerUrl;
+  let h=`<div class="hero"><div class="label">Analyse</div>
+    <div class="total" style="font-size:30px">Ton patrimoine,<br>examiné à froid</div></div><main>`;
+  if(!ok){
+    h+=`<div class="card"><p style="margin:0;font-size:14px">L\u2019analyse a besoin de l\u2019adresse de ton Worker Cloudflare pour joindre Claude sans exposer ta clé API.</p>
+      <div class="actions"><button class="btn btn-p" onclick="openSettings()">Renseigner l\u2019adresse</button></div></div></main>`;
+    el().innerHTML=h;return;
+  }
+  h+=`<textarea id="q" placeholder="Pose ta question. Claude reçoit le détail de tes lignes, pas seulement les totaux."></textarea>
+    <div class="chips">${PRESETS.map(p=>`<button class="chip" onclick="document.getElementById('q').value=${JSON.stringify(p).replace(/"/g,'&quot;')};ask()">${p}</button>`).join('')}</div>
+    <div class="actions"><button class="btn btn-p" id="ask" onclick="ask()">Demander</button></div>
+    <div id="ans">${lastAnswer?`<div class="answer">${lastAnswer}</div>`:''}</div>
+    <div class="disclaimer">Claude n\u2019est ni conseiller en gestion de patrimoine ni analyste agréé. Il raisonne sur les chiffres que tu lui envoies et peut se tromper sur tout le reste. Les valorisations, multiples et perspectives qu\u2019il cite de mémoire sont à vérifier.</div></main>`;
+  el().innerHTML=h;
+}
+
+function portfolioPayload(){
+  const pv=peaValue(),inv=peaInvested();
+  return {
+    date:today(),
+    total:Math.round(total()),
+    categories:Object.fromEntries(Object.entries(CATS).map(([k,v])=>[v,Math.round(catTotal(k))])),
+    comptes:S.accounts.map(a=>({nom:a.name,etablissement:a.institution,categorie:CATS[a.category],
+      valeur:Math.round(accountValue(a)),investi:a.invested?Math.round(a.invested):null})),
+    pea:{
+      ouvert_le:S.pea.openDate,valeur:Math.round(pv),versements_cumules:Math.round(inv),
+      plus_value:Math.round(pv-inv),tri_annualise_pct:peaTri()?+peaTri().toFixed(1):null,
+      liquidites:Math.round(S.pea.cash),
+      lignes:S.pea.positions.map(p=>({ticker:p.ticker,nom:p.name,quantite:p.qty,pru:p.pru,
+        cours:p.price||null,valeur:Math.round(p.qty*(p.price||p.pru)),
+        poids_pct:pv?+(p.qty*(p.price||p.pru)/pv*100).toFixed(1):null})),
+      ventes_realisees:S.pea.sales.map(s=>({ticker:s.ticker,date:s.date,gain:Math.round((s.price-s.pru)*s.qty),
+        perf_pct:+((s.price-s.pru)/s.pru*100).toFixed(1)})),
+      dividendes_12m:Math.round(S.pea.dividends.filter(d=>new Date(d.date)>new Date(Date.now()-365*864e5))
+        .reduce((a,d)=>a+ +d.amount,0))
+    },
+    historique:S.snapshots.slice(-24).map(s=>({date:s.date,total:Math.round(s.total)}))
+  };
+}
+
+async function ask(){
+  const q=document.getElementById('q').value.trim();
+  if(!q)return;
+  const btn=document.getElementById('ask');
+  btn.innerHTML='<span class="spin"></span> Analyse en cours';btn.disabled=true;
+  try{
+    const r=await fetch(S.settings.workerUrl.replace(/\/$/,'')+'/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:S.settings.token,question:q,portfolio:portfolioPayload()})
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||('Erreur '+r.status));
+    lastAnswer=md(d.text||'');
+  }catch(e){
+    lastAnswer=`<p class="down">L\u2019appel a échoué : ${esc(e.message)}.</p><p class="dim">Vérifie l\u2019adresse du Worker dans les réglages et que la clé API y est bien définie.</p>`;
+  }
+  btn.innerHTML='Demander';btn.disabled=false;
+  document.getElementById('ans').innerHTML=`<div class="answer">${lastAnswer}</div>`;
+}
+
+function md(t){
+  const lines=esc(t).split('\n');let out='',inUl=false;
+  for(let l of lines){
+    l=l.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    if(/^#{1,4}\s/.test(l)){if(inUl){out+='</ul>';inUl=false}out+='<h4>'+l.replace(/^#{1,4}\s/,'')+'</h4>'}
+    else if(/^[-*]\s/.test(l)){if(!inUl){out+='<ul>';inUl=true}out+='<li>'+l.replace(/^[-*]\s/,'')+'</li>'}
+    else if(l.trim()===''){if(inUl){out+='</ul>';inUl=false}}
+    else{if(inUl){out+='</ul>';inUl=false}out+='<p>'+l+'</p>'}
+  }
+  return out+(inUl?'</ul>':'');
+}
+
+/* ============================ COURS ============================ */
+async function refreshPrices(){
+  if(!S.settings.workerUrl){openSettings();return}
+  const syms=[...new Set(S.pea.positions.map(p=>p.ticker).filter(Boolean))];
+  const ids=[...new Set(S.accounts.filter(a=>a.category==='crypto'&&a.coingeckoId).map(a=>a.coingeckoId))];
+  if(!syms.length&&!ids.length)return;
+  toast('Récupération des cours…');
+  const base=S.settings.workerUrl.replace(/\/$/,'');
+  try{
+    if(syms.length){
+      const r=await fetch(`${base}/quote?symbols=${encodeURIComponent(syms.join(','))}&token=${encodeURIComponent(S.settings.token)}`);
+      const d=await r.json();
+      S.pea.positions.forEach(p=>{if(d[p.ticker]){p.price=d[p.ticker];p.priceAt=today()}});
+    }
+    if(ids.length){
+      const r=await fetch(`${base}/crypto?ids=${encodeURIComponent(ids.join(','))}&token=${encodeURIComponent(S.settings.token)}`);
+      const d=await r.json();
+      S.accounts.forEach(a=>{if(a.coingeckoId&&d[a.coingeckoId]){a.price=d[a.coingeckoId];a.priceAt=today()}});
+    }
+    save();render();toast('Cours mis à jour (différé 15 min)');
+  }catch(e){toast('Échec de la récupération des cours')}
+}
+
+/* ============================ FORMULAIRES ============================ */
+const sheet=document.getElementById('sheet'),sheetIn=document.getElementById('sheet-in');
+function openSheet(html){sheetIn.innerHTML=html;sheet.classList.add('open')}
+function closeSheet(){sheet.classList.remove('open')}
+sheet.addEventListener('click',e=>{if(e.target===sheet)closeSheet()});
+function val(id){return document.getElementById(id).value}
+function num(id){const v=parseFloat(String(val(id)).replace(',','.'));return isNaN(v)?0:v}
+
+function editAccount(id,cat){
+  const a=S.accounts.find(x=>x.id===id)||{category:cat||'epargne'};
+  openSheet(`<h3>${id?'Modifier la ligne':'Nouvelle ligne'}</h3>
+    <label>Nom du support</label><input id="f-name" value="${esc(a.name||'')}" placeholder="Livret A, Bitcoin, PER…">
+    <label>Établissement</label><input id="f-inst" value="${esc(a.institution||'')}" placeholder="BoursoBank, Binance…">
+    <label>Catégorie</label><select id="f-cat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${a.category===k?'selected':''}>${v}</option>`).join('')}</select>
+    <div class="grid2">
+      <div><label>Valeur actuelle (€)</label><input id="f-val" type="text" inputmode="decimal" value="${a.value??''}"></div>
+      <div><label>Montant investi (€)</label><input id="f-inv" type="text" inputmode="decimal" value="${a.invested??''}"></div>
+    </div>
+    <label>Identifiant CoinGecko (crypto, facultatif)</label><input id="f-cg" value="${esc(a.coingeckoId||'')}" placeholder="bitcoin, ethereum, solana">
+    <div class="grid2"><div><label>Quantité détenue</label><input id="f-qty" type="text" inputmode="decimal" value="${a.qty??''}"></div>
+    <div><label>Cours unitaire (€)</label><input id="f-price" type="text" inputmode="decimal" value="${a.price??''}"></div></div>
+    <div class="hint">Renseigne l\u2019identifiant CoinGecko et la quantité pour que la valeur se calcule seule.</div>
+    <div class="actions">
+      ${id?`<button class="btn btn-d" onclick="delAccount('${id}')">Supprimer</button>`:''}
+      <button class="btn btn-s" onclick="closeSheet()">Annuler</button>
+      <button class="btn btn-p" onclick="saveAccount('${id||''}')">Enregistrer</button></div>`);
+}
+function saveAccount(id){
+  const o={id:id||uid(),name:val('f-name').trim()||'Sans nom',institution:val('f-inst').trim(),
+    category:val('f-cat'),value:num('f-val'),invested:num('f-inv')||null,
+    coingeckoId:val('f-cg').trim()||null,qty:num('f-qty')||null,price:num('f-price')||null};
+  const i=S.accounts.findIndex(x=>x.id===id);
+  if(i>=0)S.accounts[i]=Object.assign(S.accounts[i],o);else S.accounts.push(o);
+  save();closeSheet();render();
+}
+function delAccount(id){S.accounts=S.accounts.filter(x=>x.id!==id);save();closeSheet();render()}
+
+function editPosition(id){
+  const p=S.pea.positions.find(x=>x.id===id)||{};
+  openSheet(`<h3>${id?'Modifier la ligne':'Nouvelle ligne du PEA'}</h3>
+    <div class="grid2"><div><label>Ticker</label><input id="p-tick" value="${esc(p.ticker||'')}" placeholder="MC.PA" autocapitalize="characters"></div>
+    <div><label>Nom</label><input id="p-name" value="${esc(p.name||'')}" placeholder="LVMH"></div></div>
+    <div class="grid2"><div><label>Quantité</label><input id="p-qty" type="text" inputmode="decimal" value="${p.qty??''}"></div>
+    <div><label>PRU (€)</label><input id="p-pru" type="text" inputmode="decimal" value="${p.pru??''}"></div></div>
+    <label>Cours actuel (€)</label><input id="p-price" type="text" inputmode="decimal" value="${p.price??''}">
+    <div class="hint">Suffixe Euronext Paris : <strong>.PA</strong>. Amsterdam <strong>.AS</strong>, Bruxelles <strong>.BR</strong>, Milan <strong>.MI</strong>, Francfort <strong>.DE</strong>.</div>
+    <div class="actions">
+      ${id?`<button class="btn btn-d" onclick="delPosition('${id}')">Supprimer</button>`:''}
+      <button class="btn btn-s" onclick="closeSheet()">Annuler</button>
+      <button class="btn btn-p" onclick="savePosition('${id||''}')">Enregistrer</button></div>`);
+}
+function savePosition(id){
+  const o={id:id||uid(),ticker:val('p-tick').trim().toUpperCase(),name:val('p-name').trim(),
+    qty:num('p-qty'),pru:num('p-pru'),price:num('p-price')||null,priceAt:num('p-price')?today():null};
+  const i=S.pea.positions.findIndex(x=>x.id===id);
+  if(i>=0)S.pea.positions[i]=Object.assign(S.pea.positions[i],o);else S.pea.positions.push(o);
+  save();closeSheet();render();
+}
+function delPosition(id){S.pea.positions=S.pea.positions.filter(x=>x.id!==id);save();closeSheet();render()}
+
+function editContribution(id){
+  const c=S.pea.contributions.find(x=>x.id===id)||{date:today()};
+  openSheet(`<h3>${id?'Modifier le versement':'Nouveau versement'}</h3>
+    <label>Date</label><input id="c-date" type="date" value="${c.date||today()}">
+    <label>Montant (€)</label><input id="c-amt" type="text" inputmode="decimal" value="${c.amount??''}">
+    <div class="hint">Un versement, pas une valeur de portefeuille. C\u2019est l\u2019argent frais que tu as viré sur le PEA.</div>
+    <div class="actions">
+      ${id?`<button class="btn btn-d" onclick="delContribution('${id}')">Supprimer</button>`:''}
+      <button class="btn btn-s" onclick="closeSheet()">Annuler</button>
+      <button class="btn btn-p" onclick="saveContribution('${id||''}')">Enregistrer</button></div>`);
+}
+function saveContribution(id){
+  const o={id:id||uid(),date:val('c-date'),amount:num('c-amt')};
+  const i=S.pea.contributions.findIndex(x=>x.id===id);
+  if(i>=0)S.pea.contributions[i]=o;else S.pea.contributions.push(o);
+  save();closeSheet();render();
+}
+function delContribution(id){S.pea.contributions=S.pea.contributions.filter(x=>x.id!==id);save();closeSheet();render()}
+
+function editSale(id){
+  const s=S.pea.sales.find(x=>x.id===id)||{date:today()};
+  openSheet(`<h3>${id?'Modifier la vente':'Nouvelle vente'}</h3>
+    <div class="grid2"><div><label>Ticker</label><input id="s-tick" value="${esc(s.ticker||'')}" autocapitalize="characters"></div>
+    <div><label>Nom</label><input id="s-name" value="${esc(s.name||'')}"></div></div>
+    <div class="grid2"><div><label>Quantité vendue</label><input id="s-qty" type="text" inputmode="decimal" value="${s.qty??''}"></div>
+    <div><label>PRU (€)</label><input id="s-pru" type="text" inputmode="decimal" value="${s.pru??''}"></div></div>
+    <div class="grid2"><div><label>Prix de vente (€)</label><input id="s-price" type="text" inputmode="decimal" value="${s.price??''}"></div>
+    <div><label>Date</label><input id="s-date" type="date" value="${s.date||today()}"></div></div>
+    <div class="hint">Pense à ajuster ou supprimer la ligne correspondante dans le PEA.</div>
+    <div class="actions">
+      ${id?`<button class="btn btn-d" onclick="delSale('${id}')">Supprimer</button>`:''}
+      <button class="btn btn-s" onclick="closeSheet()">Annuler</button>
+      <button class="btn btn-p" onclick="saveSale('${id||''}')">Enregistrer</button></div>`);
+}
+function saveSale(id){
+  const o={id:id||uid(),ticker:val('s-tick').trim().toUpperCase(),name:val('s-name').trim(),
+    qty:num('s-qty'),pru:num('s-pru'),price:num('s-price'),date:val('s-date')};
+  const i=S.pea.sales.findIndex(x=>x.id===id);
+  if(i>=0)S.pea.sales[i]=o;else S.pea.sales.push(o);
+  save();closeSheet();render();
+}
+function delSale(id){S.pea.sales=S.pea.sales.filter(x=>x.id!==id);save();closeSheet();render()}
+
+function editDividend(id){
+  const d=S.pea.dividends.find(x=>x.id===id)||{date:today()};
+  openSheet(`<h3>${id?'Modifier le dividende':'Nouveau dividende'}</h3>
+    <div class="grid2"><div><label>Ticker</label><input id="d-tick" value="${esc(d.ticker||'')}" autocapitalize="characters"></div>
+    <div><label>Nom</label><input id="d-name" value="${esc(d.name||'')}"></div></div>
+    <div class="grid2"><div><label>Montant net (€)</label><input id="d-amt" type="text" inputmode="decimal" value="${d.amount??''}"></div>
+    <div><label>Date de détachement</label><input id="d-date" type="date" value="${d.date||today()}"></div></div>
+    <div class="actions">
+      ${id?`<button class="btn btn-d" onclick="delDividend('${id}')">Supprimer</button>`:''}
+      <button class="btn btn-s" onclick="closeSheet()">Annuler</button>
+      <button class="btn btn-p" onclick="saveDividend('${id||''}')">Enregistrer</button></div>`);
+}
+function saveDividend(id){
+  const o={id:id||uid(),ticker:val('d-tick').trim().toUpperCase(),name:val('d-name').trim(),
+    amount:num('d-amt'),date:val('d-date')};
+  const i=S.pea.dividends.findIndex(x=>x.id===id);
+  if(i>=0)S.pea.dividends[i]=o;else S.pea.dividends.push(o);
+  save();closeSheet();render();
+}
+function delDividend(id){S.pea.dividends=S.pea.dividends.filter(x=>x.id!==id);save();closeSheet();render()}
+
+/* ---------- Réglages ---------- */
+function openSettings(){
+  openSheet(`<h3>Réglages</h3>
+    <label>Adresse du Worker Cloudflare</label><input id="g-url" value="${esc(S.settings.workerUrl)}" placeholder="https://patrimoine.xxx.workers.dev" autocapitalize="off">
+    <label>Jeton partagé</label><input id="g-tok" value="${esc(S.settings.token)}" placeholder="la même chaîne que dans le Worker" autocapitalize="off">
+    <div class="grid2"><div><label>Ouverture du PEA</label><input id="g-open" type="date" value="${S.pea.openDate}"></div>
+    <div><label>Liquidités du PEA (€)</label><input id="g-cash" type="text" inputmode="decimal" value="${S.pea.cash}"></div></div>
+    <div class="actions"><button class="btn btn-s" onclick="exportJson()">Exporter</button>
+    <button class="btn btn-s" onclick="document.getElementById('imp').click()">Importer</button></div>
+    <input type="file" id="imp" accept="application/json" style="display:none" onchange="importJson(this)">
+    <div class="hint">Tes données ne quittent jamais ce téléphone, sauf au moment d\u2019une analyse. Exporte régulièrement : vider le cache Safari efface tout.</div>
+    <div class="actions"><button class="btn btn-d" onclick="wipe()">Tout effacer</button>
+    <button class="btn btn-p" onclick="saveSettings()">Enregistrer</button></div>`);
+}
+function saveSettings(){
+  S.settings.workerUrl=val('g-url').trim();S.settings.token=val('g-tok').trim();
+  S.pea.openDate=val('g-open');S.pea.cash=num('g-cash');
+  save();closeSheet();render();
+}
+function exportJson(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`patrimoine-${today()}.json`;a.click();
+}
+function importJson(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{S=Object.assign(structuredClone(DEFAULT),JSON.parse(r.result));save();closeSheet();render();toast('Données importées')}
+    catch(e){toast('Fichier illisible')}};
+  r.readAsText(f);
+}
+function wipe(){if(confirm('Effacer toutes les données ? Cette action est définitive.')){localStorage.removeItem(KEY);S=structuredClone(DEFAULT);closeSheet();render()}}
+
+/* ============================ DIVERS ============================ */
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200)}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+document.getElementById('btn-settings').onclick=openSettings;
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
